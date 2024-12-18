@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>JY^2的旅行blog</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  /*侧边栏样式*/
+  #sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #f4f4f4;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  #file-selector {
+    margin-bottom: 20px;
+  }
+  #content {
+    margin-left: 270px;
+    padding: 30px;
+    font-family: 'Arial', sans-serif; /* 设置字体 */
+    font-size: 16px; /* 设置字号 */
+    line-height: 1.5; /* 可选：设置行高以改善可读性 */
+    /*text-align: center; /* 仅居中内容 */
+
+  }
+  #content h1{
+    /*font-family: 'Georgia', serif;*/
+    font-size: 45px;
+  }
+  #content h2, #content h3 {
+    /*font-family: 'Georgia', serif;*/
+    font-size: 35px;
+  }
+  #content h4 {
+    /*font-family: 'Georgia', serif;*/
+    font-size: 30px;
+  }
+  #content p {
+    font-family: 'Georgia', sans-serif;
+    font-size: 25px;
+  }
+  #sidebar ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  #sidebar ul li a {
+    display: block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #000;
+  }
+  #sidebar ul li a:hover {
+    background-color: #ddd;
+  }
+    /* 基本样式 */
+  #toc {
+    list-style-type: none;
+    padding-left: 0;
+  }
+
+  #toc li {
+    margin-bottom: 5px;
+  }
+
+  #toc a {
+    display: block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #000;
+    background-color: #f4f4f4;
+  }
+
+  #toc a:hover {
+    background-color: #ddd;
+  }
+
+  /* 缩进样式 */
+  #toc ul {
+    padding-left: 20px; /* 缩进量 */
+    list-style-type: disc;
+    display: none; /* 默认隐藏子项 */
+  }
+
+  #toc .active > ul {
+    display: block; /* 点击后显示子项 */
+  }
+  /* 其他样式 */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<!--开始标记网页主体内容 -->
+<div id="sidebar">
+  <!--1 文件选择器-->
+  <h3>选择文件</h3>
+  <div id="file-selector">
+    <ul id="file-list"></ul>
+  <!--目录-->  
+  </div>
+  <h3>目录</h3>
+  <ul id="toc"></ul>
+</div>
+<div id="content">
+  <!-- 内容将由Markdown转换而来 -->
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 异步加载Markdown文件
+    fetch('content.md') // 替换为实际路径
+        .then(response => response.text())
+        .then(text => {
+            // 使用marked库解析Markdown文本
+            const content = marked.parse(text);
+            
+            // 将解析后的HTML内容插入到页面中
+            document.getElementById('content').innerHTML = content;
+
+            // 后处理：为标题添加ID
+            const headings = document.querySelectorAll('#content h1, #content h2');
+            const ids = new Set(); // 用于存储已经使用的ID，避免重复
+
+            headings.forEach((heading, index) => {
+                if (!heading.id) { // 只有当没有ID时才设置
+                    // 创建一个基于文本内容的ID，并确保其唯一性
+                    let baseId = heading.textContent.toLowerCase().replace(/[^\w]+/g, '-');
+                    let id = baseId;
+                    let counter = 1;
+
+                    while (ids.has(id)) {
+                        id = `${baseId}-${counter}`;
+                        counter++;
+                    }
+
+                    heading.id = id;
+                    ids.add(id); // 添加到已使用的ID集合中
+                }
+            });
+
+            // 在内容更新并且标题有了ID之后重新创建目录
+            createTOC();
+        })
+        .catch(err => console.error('Error fetching or parsing Markdown file:', err));
+});
+
+// 假设我们已经有了转换好的HTML内容，我们现在要创建目录
+function createTOC() {
+    const toc = document.getElementById('toc');
+    const headings = Array.from(document.querySelectorAll('#content h2, #content h3'));
+
+    let currentUl = toc;
+    headings.forEach((heading) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `#${heading.id}`;
+        a.textContent = heading.textContent;
+        a.addEventListener('click', (event) => {
+            event.preventDefault();
+            document.querySelector(a.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+
+        li.appendChild(a);
+
+        if (heading.tagName === 'H2') {
+            toc.appendChild(li);
+            currentUl = document.createElement('ul');
+            li.appendChild(currentUl);
+        } else if (heading.tagName === 'H3') {
+            currentUl.appendChild(li);
+        }
+
+        a.addEventListener('click', () => {
+            li.classList.toggle('active');
+        });
+    });
+}
+</script>
+
+</body>
+</html>
