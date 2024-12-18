@@ -117,7 +117,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 异步加载Markdown文件
-    fetch('content.md') // 替换为实际路径
+    fetch('doc/content.md') // 替换为实际路径
         .then(response => response.text())
         .then(text => {
             // 使用marked库解析Markdown文本
