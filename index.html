@@ -107,6 +107,9 @@
 <div id="sidebar">
   <!--1 文件选择器-->
   <h3>选择文件</h3>
+  <button onclick="loadMarkdown('doc/昆明.md')">202505昆明</button>
+  <button onclick="loadMarkdown('doc/冰岛.md')">冰岛</button>
+<!-- 添加更多按钮 -->
   <div id="file-selector">
     <ul id="file-list"></ul>
   <!--目录-->  
@@ -119,9 +122,8 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 异步加载Markdown文件
-    fetch('doc/昆明.md') // 替换为实际路径
+function loadMarkdown(filePath) {
+    fetch(filePath)
         .then(response => response.text())
         .then(text => {
             // 使用marked库解析Markdown文本
@@ -155,6 +157,9 @@ document.addEventListener('DOMContentLoaded', function() {
             createTOC();
         })
         .catch(err => console.error('Error fetching or parsing Markdown file:', err));
+}
+document.addEventListener('DOMContentLoaded', function() {
+    loadMarkdown('doc/README.md'); // 默认加载的Markdown文件
 });
 
 // 假设我们已经有了转换好的HTML内容，我们现在要创建目录
