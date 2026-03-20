@@ -1,0 +1,154 @@
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+}
+
+video, img {
+    width: 100%;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+
+a {
+    color: #2980b9;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.section {
+    margin-bottom: 40px;
+}
+
+.hidden {
+    display: none;
+}
+
+ul, ol {
+    margin-left: 20px;
+}
+
+.tips {
+    background-color: #eef6fb;
+    border-left: 5px solid #3498db;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+footer {
+    background-color: #ecf0f1;
+    text-align: center;
+    padding: 15px;
+    font-size: 0.9em;
+    color: #777;
+}
+
+/* 侧边栏整体样式 */
+.sidebar {
+    width: 220px;               /* 侧边栏宽度 */
+    height: 100vh;              /* 占满整个视口高度 */
+    background-color: #f0f4f8;  /* 背景颜色，浅蓝灰 */
+    position: fixed;            /* 固定定位，随页面滚动 */
+    top: 0;
+    left: 0;
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* 右侧阴影 */
+    z-index: 1000;              /* 确保在其他内容之上 */
+}
+
+/* 去除列表默认样式 */
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 链接样式 */
+.sidebar ul li a {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+
+/* 鼠标悬停效果 */
+.sidebar ul li a:hover {
+    background-color: #007BFF;
+    color: white;
+}
+
+/* 当前页面高亮（可手动给当前页链接加 class="active"） */
+.sidebar ul li a.active {
+    background-color: #0056b3;
+    color: white;
+    font-weight: bold;
+}
+
+/* 主内容区域留出侧边栏空间 */
+.section {
+    margin-left: 240px;         /* 略大于侧边栏宽度 */
+    padding: 20px;
+}
+
+/* 活动导航链接样式 */
+.sidebar ul li a.active {
+    background-color: #0056b3;
+    color: white;
+    font-weight: bold;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        box-shadow: none;
+    }
+
+    .section {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .sidebar ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .sidebar ul li {
+        margin: 5px;
+    }
+
+    .sidebar ul li a {
+        padding: 8px 12px;
+        border-radius: 5px;
+    }
+}

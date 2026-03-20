@@ -1,206 +1,49 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>JY^2的旅行blog</title>
-<style>
-  body { font-family: Arial, sans-serif; }
-  /*侧边栏样式*/
-  #sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 250px;
-    height: 100%;
-    background-color: #f4f4f4;
-    padding: 20px;
-    overflow-y: auto;
-  }
-  #file-selector {
-    margin-bottom: 20px;
-  }
-  #content {
-    margin-left: 270px;
-    padding: 30px;
-    font-family: 'Arial', sans-serif; /* 设置字体 */
-    font-size: 16px; /* 设置字号 */
-    line-height: 1.5; /* 可选：设置行高以改善可读性 */
-    /*text-align: center; /* 仅居中内容 */
-
-  }
-  #content h1{
-    /*font-family: 'Georgia', serif;*/
-    font-size: 45px;
-  }
-  #content h2{
-    /*font-family: 'Georgia', serif;*/
-    font-size: 35px;
-  }
-  #content h3 {
-    /*font-family: 'Georgia', serif;*/
-    font-size: 32px;
-  }
-  #content h4 {
-    /*font-family: 'Georgia', serif;*/
-    font-size: 30px;
-  }
-  #content p {
-    font-family: 'Georgia', sans-serif;
-    font-size: 25px;
-  }
-  #sidebar ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  #sidebar ul li a {
-    display: block;
-    padding: 8px 16px;
-    text-decoration: none;
-    color: #000;
-  }
-  #sidebar ul li a:hover {
-    background-color: #ddd;
-  }
-    /* 基本样式 */
-  #toc {
-    list-style-type: none;
-    padding-left: 0;
-  }
-
-  #toc li {
-    margin-bottom: 5px;
-  }
-
-  #toc a {
-    display: block;
-    padding: 8px 16px;
-    text-decoration: none;
-    color: #000;
-    background-color: #f4f4f4;
-  }
-
-  #toc a:hover {
-    background-color: #ddd;
-  }
-
-  /* 缩进样式 */
-  #toc ul {
-    padding-left: 20px; /* 缩进量 */
-    list-style-type: disc;
-    display: none; /* 默认隐藏子项 */
-  }
-
-  #toc .active > ul {
-    display: block; /* 点击后显示子项 */
-  }
-  /* 其他样式 */
-  html {
-    scroll-behavior: smooth;
-  }
-</style>
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <meta charset="UTF-8">
+    <title>JY's blog</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<!--开始标记网页主体内容 -->
-<div id="sidebar">
-  <!--1 文件选择器-->
-  <h3>选择文件</h3>
-  <button onclick="loadMarkdown('doc/昆明.md')">202505昆明</button>
-  <button onclick="loadMarkdown('doc/冰岛.md')">冰岛</button>
-<!-- 添加更多按钮 -->
-  <div id="file-selector">
-    <ul id="file-list"></ul>
-  <!--目录-->  
-  </div>
-  <h3>目录</h3>
-  <ul id="toc"></ul>
-</div>
-<div id="content">
-  <!-- 内容将由Markdown转换而来 -->
-</div>
+    <header>
+        <h1>JY's blog</h1>
+        <p>欢迎来到JY小朋友们的旅行日记（懒散更新版）</p>
+    </header>
 
-<script>
-function loadMarkdown(filePath) {
-    // 清除现有内容和目录
-    //document.getElementById('content').innerHTML = '';
-    document.getElementById('toc').innerHTML = '';
-    
-    fetch(filePath)
-        .then(response => response.text())
-        .then(text => {
-            // 使用marked库解析Markdown文本
-            const content = marked.parse(text);
-            
-            // 将解析后的HTML内容插入到页面中
-            document.getElementById('content').innerHTML = content;
+    <div class="container">
+        <section class="section card">
+            <h2>欢迎语</h2>
+            <p>这里是关于两位JY小朋友的旅行博客，内容包括（不）完整的景点、路线等旅游信息的指南。</p>
+        </section>
+    </div>
 
-            // 后处理：为标题添加ID
-            const headings = document.querySelectorAll('#content h1, #content h2');
-            const ids = new Set(); // 用于存储已经使用的ID，避免重复
+    <div class="container">
+        <section class="section card">
+            <h2>我们去过的城市</h2>
+            <p>点击下方城市查看我们的旅行日记：</p>
+            <div class="city-links">
+                <a href="iceland/iceland.html" class="nav-link">冰岛 🇮🇸</a>
+                <a href="Kunming/kunming.html" class="nav-link">昆明 🌸</a>
+                <a href="map/map.html" class="nav-link">旅行地图 🗺️</a>
+            </div>
+            <!-- <a href="#" class="nav-link" onclick="showSection('冰岛')">冰岛</a>
+            <a href="#" class="nav-link" onclick="showSection('昆明')">昆明</a> -->
+        </section>
+    </div>
 
-            headings.forEach((heading, index) => {
-                if (!heading.id) { // 只有当没有ID时才设置
-                    // 创建一个基于文本内容的ID，并确保其唯一性
-                    let baseId = heading.textContent.toLowerCase().replace(/[^\w]+/g, '-');
-                    let id = baseId;
-                    let counter = 1;
-
-                    while (ids.has(id)) {
-                        id = `${baseId}-${counter}`;
-                        counter++;
-                    }
-
-                    heading.id = id;
-                    ids.add(id); // 添加到已使用的ID集合中
-                }
-            });
-
-            // 在内容更新并且标题有了ID之后重新创建目录
-            createTOC();
-        })
-        .catch(err => console.error('Error fetching or parsing Markdown file:', err));
-}
-document.addEventListener('DOMContentLoaded', function() {
-    loadMarkdown('doc/README.md'); // 默认加载的Markdown文件
-});
-
-// 假设我们已经有了转换好的HTML内容，我们现在要创建目录
-function createTOC() {
-    const toc = document.getElementById('toc');
-    const headings = Array.from(document.querySelectorAll('#content h2, #content h3'));
-
-    let currentUl = toc;
-    headings.forEach((heading) => {
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = `#${heading.id}`;
-        a.textContent = heading.textContent;
-        a.addEventListener('click', (event) => {
-            event.preventDefault();
-            document.querySelector(a.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        });
-
-        li.appendChild(a);
-
-        if (heading.tagName === 'H2') {
-            toc.appendChild(li);
-            currentUl = document.createElement('ul');
-            li.appendChild(currentUl);
-        } else if (heading.tagName === 'H3') {
-            currentUl.appendChild(li);
-        }
-
-        a.addEventListener('click', () => {
-            li.classList.toggle('active');
-        });
-    });
-}
-</script>
-
+    <div class="container">
+        <section class="section card">
+            <h2>更新日志</h2>
+            <ul class="update-log">
+                <li>🚀 2024.12.16 - 趁着JY1号同志的生日来临，JY2号开始筹备生日惊喜。老友旅行记录网站诞生！</li>
+                <li>🌸 2024.05.05 - JY1号和JY2号结束昆明之旅，于闷闷臭臭的高铁上完成昆明游记的创造。</li>
+            </ul>
+        </section>
+    </div>
+    <footer>
+        &copy; 2025 JY's blog | 所有资料来源于原创和网络整理，禁止转载或搬运。
+    </footer>
 </body>
 </html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的旅行足迹地图</title>
+    <link rel="stylesheet" href="map.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>我的旅行足迹</h1>
+            <p class="subtitle">探索世界，记录美好时光</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="sidebar">
+                <div class="info-box">
+                    <h2>旅行地点</h2>
+                    <div class="location-list">
+                        <div class="location-item active" data-location="reykjavik">
+                            <h3>雷克雅未克</h3>
+                            <p>冰岛首都 | 北欧风情</p>
+                        </div>
+                        <div class="location-item" data-location="golden-circle">
+                            <h3>黄金圈</h3>
+                            <p>三大景点 | 自然奇观</p>
+                        </div>
+                        <div class="location-item" data-location="vik">
+                            <h3>维克镇</h3>
+                            <p>黑沙滩 | 南部海岸</p>
+                        </div>
+                        <div class="location-item" data-location="jokulsarlon">
+                            <h3>杰古沙龙冰河湖</h3>
+                            <p>冰川湖 | 蓝色冰山</p>
+                        </div>
+                        <div class="location-item" data-location="kunming">
+                            <h3>昆明</h3>
+                            <p>春城 | 云南之旅</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn" id="zoom-in">放大</button>
+                    <button class="btn" id="zoom-out">缩小</button>
+                    <button class="btn" id="reset-view">重置视图</button>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">5</div>
+                        <div class="stat-label">已访城市</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">2</div>
+                        <div class="stat-label">已访国家</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15K</div>
+                        <div class="stat-label">旅行里程</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 我的旅行博客 | 使用百度地图API绘制</p>
+        </footer>
+    </div>
+
+    <!-- 引入百度地图API -->
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=DJwogTtbe4RBefFeypCOeBxSpUJYtyEP"></script>
+    <script>
+        // 初始化地图
+        var map = new BMap.Map("map");
+        var point = new BMap.Point(116.404, 39.915);
+        map.centerAndZoom(point, 2);
+        map.enableScrollWheelZoom(true);
+        
+        // 添加缩放控件
+        map.addControl(new BMap.NavigationControl());
+        
+        // 定义地点数据
+        var locations = {
+            reykjavik: {
+                point: new BMap.Point(-21.8278, 64.1283),
+                zoom: 10,
+                title: "雷克雅未克",
+                content: "冰岛首都，世界上位置最北的首都。充满北欧风情的小城，有彩色房屋和丰富文化。"
+            },
+            golden-circle: {
+                point: new BMap.Point(-20.2995, 64.2556),
+                zoom: 9,
+                title: "黄金圈",
+                content: "包括辛格维利尔国家公园、盖歇尔间歇泉和黄金瀑布三大著名景点。"
+            },
+            vik: {
+                point: new BMap.Point(-19.0224, 63.4194),
+                zoom: 11,
+                title: "维克镇",
+                content: "冰岛南部小镇，以黑沙滩和 Reynisdrangar 海蚀柱闻名。"
+            },
+            jokulsarlon: {
+                point: new BMap.Point(-16.1797, 64.0800),
+                zoom: 12,
+                title: "杰古沙龙冰河湖",
+                content: "冰岛最著名的冰川湖，湖中漂浮着巨大的蓝色冰山，景色壮观。"
+            },
+            kunming: {
+                point: new BMap.Point(102.7123, 25.0438),
+                zoom: 11,
+                title: "昆明",
+                content: "云南省会，四季如春的春城。游览了翠湖、滇池、斗南花市等地。"
+            }
+        };
+        
+        // 添加标记和信息窗口
+        var infoWindow = new BMap.InfoWindow("", {width: 250, height: 100});
+        
+        for (var key in locations) {
+            if (locations.hasOwnProperty(key)) {
+                var loc = locations[key];
+                var marker = new BMap.Marker(loc.point);
+                map.addOverlay(marker);
+                
+                marker.addEventListener("click", function() {
+                    var point = this.getPosition();
+                    map.panTo(point);
+                    infoWindow.setContent('<div style="margin:10px;"><h4>' + loc.title + '</h4><p>' + loc.content + '</p></div>');
+                    map.openInfoWindow(infoWindow, point);
+                });
+            }
+        }
+        
+        // 添加地点列表交互
+        var locationItems = document.querySelectorAll('.location-item');
+        locationItems.forEach(function(item) {
+            item.addEventListener('click', function() {
+                // 移除所有active类
+                locationItems.forEach(function(el) {
+                    el.classList.remove('active');
+                });
+                
+                // 添加active类到当前项
+                this.classList.add('active');
+                
+                // 获取地点数据
+                var locationKey = this.getAttribute('data-location');
+                var location = locations[locationKey];
+                
+                // 移动地图到该位置
+                map.panTo(location.point);
+                map.setZoom(location.zoom);
+                
+                // 打开信息窗口
+                infoWindow.setContent('<div style="margin:10px;"><h4>' + location.title + '</h4><p>' + location.content + '</p></div>');
+                map.openInfoWindow(infoWindow, location.point);
+            });
+        });
+        
+        // 添加按钮功能
+        document.getElementById('zoom-in').addEventListener('click', function() {
+            map.zoomIn();
+        });
+        
+        document.getElementById('zoom-out').addEventListener('click', function() {
+            map.zoomOut();
+        });
+        
+        document.getElementById('reset-view').addEventListener('click', function() {
+            map.centerAndZoom(point, 2);
+        });
+        
+        // 添加一些自定义覆盖物（旅行路线）
+        var polylinePoints = [
+            new BMap.Point(-21.8278, 64.1283),  // 雷克雅未克
+            new BMap.Point(-20.2995, 64.2556),  // 黄金圈
+            new BMap.Point(-19.0224, 63.4194),  // 维克镇
+            new BMap.Point(-16.1797, 64.0800)   // 杰古沙龙冰河湖
+        ];
+        
+        var polyline = new BMap.Polyline(polylinePoints, {
+            strokeColor: "#3498db",
+            strokeWeight: 3,
+            strokeOpacity: 0.7
+        });
+        map.addOverlay(polyline);
+    </script>
+</body>
+</html>
