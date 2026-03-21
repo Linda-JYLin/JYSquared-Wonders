@@ -57,6 +57,92 @@
             box-shadow: var(--box-shadow);
         }
 
+        /* 图片画廊样式 */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-caption {
+            padding: 15px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .modal-caption {
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
         @media (max-width: 768px) {
             .iceland-gallery {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -65,6 +151,15 @@
 
             .video-gallery {
                 flex-direction: column;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .gallery-item img {
+                height: 150px;
             }
         }
     </style>
@@ -82,6 +177,7 @@
     <h2>导航菜单</h2>
     <ul>
         <li><a href="#" onclick="showSection('dream')"><i class="fas fa-cloud-moon"></i> 梦区</a></li>
+        <li><a href="#" onclick="showSection('gallery')"><i class="fas fa-images"></i> 图片画廊</a></li>
         <li><a href="#" onclick="showSection('intro')"><i class="fas fa-info-circle"></i> 简介</a></li>
         <li><a href="#" onclick="showSection('reykjavik')"><i class="fas fa-city"></i> 雷克雅未克</a></li>
         <li><a href="#" onclick="showSection('golden-circle')"><i class="fas fa-mountain"></i> 黄金圈线</a></li>
@@ -96,6 +192,15 @@
         <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
     </footer>
 </aside>
+
+        <!-- 图片模态框 -->
+        <div id="imageModal" class="modal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-content">
+                <img id="modalImage" src="" alt="">
+                <div class="modal-caption" id="modalCaption"></div>
+            </div>
+        </div>
 
 <!-- 各个内容区域 -->
 <main class="content">
@@ -138,6 +243,20 @@
                  style="border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
         </div>
     </div>
+    </section>
+
+    <!-- 图片画廊 -->
+    <section id="gallery" class="section-content">
+        <h2><i class="fas fa-images"></i> 冰岛图片画廊</h2>
+        <p>点击图片可以查看大图，使用左右箭头切换图片</p>
+
+        <div class="gallery" id="icelandGallery">
+            <!-- 图片将通过JavaScript动态加载 -->
+        </div>
+
+        <div class="attraction-item">
+            <p><i class="fas fa-lightbulb"></i> <strong>小贴士：</strong>画廊中的图片来自我们的冰岛之旅，记录了雷克雅未克、黄金圈、南部地区等地的美丽瞬间。</p>
+        </div>
     </section>
 
     <!-- <intro> -->
@@ -213,7 +332,7 @@
         });
 
         // 2. 显示目标区块
-        document.getElementById(id).classList.remove('hidden');        
+        document.getElementById(id).classList.remove('hidden');
         document.getElementById(id).classList.add('active');
 
         // 3. 更新导航菜单的高亮状态
@@ -224,10 +343,14 @@
                 link.classList.add('active');
             }
         });
+
+        // 4. 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     // 默认显示第一个内容（可选）
     document.addEventListener('DOMContentLoaded', function() {
-        showSection('dream'); // 默认显示“简介”
+        initGallery();
+        showSection('dream'); // 默认显示”梦区”
     });
     
     // function showSection(sectionId) {
@@ -265,6 +388,110 @@
         }
     }
 
+    // 图片画廊数据
+        const galleryImages = [
+            { src: '../pictures/冰岛/Iceland-Northern-Lights-1920x1282.jpg', caption: '北极光 - 冰岛夜空中的魔法' },
+            { src: '../pictures/冰岛/Winter-Ring-Road-Scenery-Iceland-3-1024x683.jpg', caption: '冬季环岛公路风光' },
+            { src: '../pictures/冰岛/Christmas.jpg', caption: '圣诞节的冰岛' },
+            { src: '../pictures/冰岛/icecream.jpg', caption: '冰岛冰淇淋' },
+            { src: '../pictures/冰岛/一号公路.jpg', caption: '冰岛一号公路' },
+            { src: '../pictures/冰岛/雷市1.jpg', caption: '雷克雅未克风光1' },
+            { src: '../pictures/冰岛/雷市2.jpg', caption: '雷克雅未克风光2' },
+            { src: '../pictures/冰岛/雷市3.jpg', caption: '雷克雅未克风光3' },
+            { src: '../pictures/冰岛/雷市4.jpg', caption: '雷克雅未克风光4' },
+            { src: '../pictures/冰岛/雷市5.jpg', caption: '雷克雅未克风光5' },
+            { src: '../pictures/冰岛/雷市6.jpg', caption: '雷克雅未克风光6' },
+            { src: '../pictures/冰岛/主街1.jpg', caption: '雷克雅未克主街1' },
+            { src: '../pictures/冰岛/主街2.jpg', caption: '雷克雅未克主街2' },
+            { src: '../pictures/冰岛/主街3.jpg', caption: '雷克雅未克主街3' },
+            { src: '../pictures/冰岛/主街4.jpg', caption: '雷克雅未克主街4' },
+            { src: '../pictures/冰岛/酒吧1.jpg', caption: '雷克雅未克酒吧1' },
+            { src: '../pictures/冰岛/酒吧2.jpg', caption: '雷克雅未克酒吧2' },
+            { src: '../pictures/冰岛/酒吧3.jpg', caption: '雷克雅未克酒吧3' },
+            { src: '../pictures/冰岛/赛里雅兰瀑布.jpg', caption: '塞里雅兰瀑布' },
+            { src: '../pictures/冰岛/斯科加瀑布.jpg', caption: '斯科加瀑布' },
+            { src: '../pictures/冰岛/飞机残骸.jpg', caption: '飞机残骸' },
+            { src: '../pictures/冰岛/黑沙滩.jpg', caption: '黑沙滩' },
+            { src: '../pictures/冰岛/维克镇.jpg', caption: '维克镇' },
+            { src: '../pictures/冰岛/杰古沙龙湖.jpg', caption: '杰古沙龙冰河湖' },
+            { src: '../pictures/冰岛/钻石沙滩.jpg', caption: '钻石沙滩' },
+            { src: '../pictures/冰岛/钻石沙滩1.jpg', caption: '钻石沙滩1' },
+            { src: '../pictures/冰岛/钻石沙滩2.jpg', caption: '钻石沙滩2' },
+            { src: '../pictures/冰岛/教会山.jpg', caption: '教会山' },
+            { src: '../pictures/冰岛/面包碗.jpg', caption: '传统面包碗' },
+            { src: '../pictures/冰岛/番茄餐厅.jpg', caption: '番茄餐厅' }
+        ];
+
+        // 初始化图片画廊
+        function initGallery() {
+            const galleryContainer = document.getElementById('icelandGallery');
+
+            galleryImages.forEach((image, index) => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                galleryItem.innerHTML = `
+                    <img src="${image.src}" alt="${image.caption}" loading="lazy">
+                    <div class="gallery-caption">${image.caption}</div>
+                `;
+
+                galleryItem.addEventListener('click', () => openModal(index));
+                galleryContainer.appendChild(galleryItem);
+            });
+        }
+
+        // 模态框功能
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalCaption = document.getElementById('modalCaption');
+        const modalClose = document.getElementById('modalClose');
+        let currentImageIndex = 0;
+
+        function openModal(index) {
+            currentImageIndex = index;
+            updateModal();
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateModal() {
+            const image = galleryImages[currentImageIndex];
+            modalImage.src = image.src;
+            modalImage.alt = image.caption;
+            modalCaption.textContent = image.caption;
+        }
+
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+            updateModal();
+        }
+
+        function prevImage() {
+            currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+            updateModal();
+        }
+
+        // 事件监听器
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // 键盘导航
+        document.addEventListener('keydown', (e) => {
+            if (modal.style.display === 'flex') {
+                if (e.key === 'Escape') closeModal();
+                if (e.key === 'ArrowRight') nextImage();
+                if (e.key === 'ArrowLeft') prevImage();
+            }
+        });
+
     // 添加动画效果
     document.addEventListener('DOMContentLoaded', () => {
         const sections = document.querySelectorAll('.section-content');
@@ -279,6 +506,7 @@
             }, 100 * index);
         });
     });
+
 </script>
 </body>
 </html>
