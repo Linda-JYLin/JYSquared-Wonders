@@ -3,8 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的旅行足迹地图</title>
+    <title>旅行足迹地图 | JY's blog</title>
     <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 地图页面特定样式 */
+        .map-stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .stat-item {
+            padding: 15px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .location-gallery {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .gallery-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .gallery-images img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-images img:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .map-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .gallery-images {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -22,25 +92,25 @@
                 <div class="info-box">
                     <h2>旅行地点</h2>
                     <div class="location-list">
-                        <div class="location-item active" data-location="reykjavik">
-                            <h3>雷克雅未克</h3>
-                            <p>冰岛首都 | 北欧风情</p>
+                        <div class="location-item active" data-location="beijing">
+                            <h3>北京</h3>
+                            <p>2023年10月 | 历史文化之旅</p>
                         </div>
-                        <div class="location-item" data-location="golden-circle">
-                            <h3>黄金圈</h3>
-                            <p>三大景点 | 自然奇观</p>
+                        <div class="location-item" data-location="paris">
+                            <h3>巴黎</h3>
+                            <p>2023年7月 | 浪漫之都</p>
                         </div>
-                        <div class="location-item" data-location="vik">
-                            <h3>维克镇</h3>
-                            <p>黑沙滩 | 南部海岸</p>
+                        <div class="location-item" data-location="tokyo">
+                            <h3>东京</h3>
+                            <p>2023年4月 | 樱花季节</p>
                         </div>
-                        <div class="location-item" data-location="jokulsarlon">
-                            <h3>杰古沙龙冰河湖</h3>
-                            <p>冰川湖 | 蓝色冰山</p>
+                        <div class="location-item" data-location="newyork">
+                            <h3>纽约</h3>
+                            <p>2022年12月 | 圣诞之旅</p>
                         </div>
-                        <div class="location-item" data-location="kunming">
-                            <h3>昆明</h3>
-                            <p>春城 | 云南之旅</p>
+                        <div class="location-item" data-location="sydney">
+                            <h3>悉尼</h3>
+                            <p>2022年8月 | 阳光海滩</p>
                         </div>
                     </div>
                 </div>
@@ -53,15 +123,15 @@
                 
                 <div class="stats">
                     <div class="stat-item">
-                        <div class="stat-number">5</div>
+                        <div class="stat-number">12</div>
                         <div class="stat-label">已访城市</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">2</div>
+                        <div class="stat-number">5</div>
                         <div class="stat-label">已访国家</div>
                     </div>
                     <div class="stat-item">
-                        <div class="stat-number">15K</div>
+                        <div class="stat-number">36K</div>
                         <div class="stat-label">旅行里程</div>
                     </div>
                 </div>
@@ -87,35 +157,35 @@
         
         // 定义地点数据
         var locations = {
-            reykjavik: {
-                point: new BMap.Point(-21.8278, 64.1283),
+            beijing: {
+                point: new BMap.Point(116.404, 39.915),
                 zoom: 10,
-                title: "雷克雅未克",
-                content: "冰岛首都，世界上位置最北的首都。充满北欧风情的小城，有彩色房屋和丰富文化。"
+                title: "北京",
+                content: "2023年10月游览了故宫、长城和颐和园，感受了深厚的历史文化底蕴。"
             },
-            golden-circle: {
-                point: new BMap.Point(-20.2995, 64.2556),
-                zoom: 9,
-                title: "黄金圈",
-                content: "包括辛格维利尔国家公园、盖歇尔间歇泉和黄金瀑布三大著名景点。"
-            },
-            vik: {
-                point: new BMap.Point(-19.0224, 63.4194),
-                zoom: 11,
-                title: "维克镇",
-                content: "冰岛南部小镇，以黑沙滩和 Reynisdrangar 海蚀柱闻名。"
-            },
-            jokulsarlon: {
-                point: new BMap.Point(-16.1797, 64.0800),
+            paris: {
+                point: new BMap.Point(2.3522, 48.8566),
                 zoom: 12,
-                title: "杰古沙龙冰河湖",
-                content: "冰岛最著名的冰川湖，湖中漂浮着巨大的蓝色冰山，景色壮观。"
+                title: "巴黎",
+                content: "2023年7月参观埃菲尔铁塔、卢浮宫和香榭丽舍大街，体验浪漫之都的魅力。"
             },
-            kunming: {
-                point: new BMap.Point(102.7123, 25.0438),
-                zoom: 11,
-                title: "昆明",
-                content: "云南省会，四季如春的春城。游览了翠湖、滇池、斗南花市等地。"
+            tokyo: {
+                point: new BMap.Point(139.6917, 35.6895),
+                zoom: 10,
+                title: "东京",
+                content: "2023年4月赏樱之旅，游览了东京塔、浅草寺和上野公园。"
+            },
+            newyork: {
+                point: new BMap.Point(-74.0060, 40.7128),
+                zoom: 12,
+                title: "纽约",
+                content: "2022年12月圣诞之旅，参观了自由女神像、时代广场和中央公园。"
+            },
+            sydney: {
+                point: new BMap.Point(151.2093, -33.8688),
+                zoom: 12,
+                title: "悉尼",
+                content: "2022年8月享受阳光海滩，游览了悉尼歌剧院、海港大桥和邦迪海滩。"
             }
         };
         
@@ -178,10 +248,11 @@
         
         // 添加一些自定义覆盖物（旅行路线）
         var polylinePoints = [
-            new BMap.Point(-21.8278, 64.1283),  // 雷克雅未克
-            new BMap.Point(-20.2995, 64.2556),  // 黄金圈
-            new BMap.Point(-19.0224, 63.4194),  // 维克镇
-            new BMap.Point(-16.1797, 64.0800)   // 杰古沙龙冰河湖
+            new BMap.Point(116.404, 39.915),
+            new BMap.Point(2.3522, 48.8566),
+            new BMap.Point(139.6917, 35.6895),
+            new BMap.Point(-74.0060, 40.7128),
+            new BMap.Point(151.2093, -33.8688)
         ];
         
         var polyline = new BMap.Polyline(polylinePoints, {

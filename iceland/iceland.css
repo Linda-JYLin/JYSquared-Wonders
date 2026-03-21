@@ -1,10 +1,12 @@
+/* 冰岛页面样式 - 继承主样式变量 */
 body {
     font-family: "Segoe UI", sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+    background-color: var(--background-color);
+    color: var(--text-color);
     line-height: 1.6;
     margin: 0;
     padding: 0;
+    transition: var(--transition);
 }
 
 header {
@@ -68,15 +70,16 @@ footer {
 
 /* 侧边栏整体样式 */
 .sidebar {
-    width: 220px;               /* 侧边栏宽度 */
+    width: 240px;               /* 侧边栏宽度 */
     height: 100vh;              /* 占满整个视口高度 */
-    background-color: #f0f4f8;  /* 背景颜色，浅蓝灰 */
+    background-color: var(--card-bg);  /* 使用卡片背景色 */
     position: fixed;            /* 固定定位，随页面滚动 */
     top: 0;
     left: 0;
     padding: 20px 0;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* 右侧阴影 */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* 右侧阴影 */
     z-index: 1000;              /* 确保在其他内容之上 */
+    transition: var(--transition);
 }
 
 /* 去除列表默认样式 */
@@ -91,21 +94,29 @@ footer {
     display: block;
     padding: 12px 20px;
     text-decoration: none;
-    color: #333;
+    color: var(--text-color);
     font-size: 16px;
-    transition: background-color 0.3s, color 0.3s;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
+.sidebar ul li a i {
+    width: 20px;
+    text-align: center;
+}
 
 /* 鼠标悬停效果 */
 .sidebar ul li a:hover {
-    background-color: #007BFF;
+    background-color: var(--primary-color);
     color: white;
+    transform: translateX(5px);
 }
 
-/* 当前页面高亮（可手动给当前页链接加 class="active"） */
+/* 当前页面高亮 */
 .sidebar ul li a.active {
-    background-color: #0056b3;
+    background-color: var(--primary-dark);
     color: white;
     font-weight: bold;
 }
@@ -114,41 +125,4 @@ footer {
 .section {
     margin-left: 240px;         /* 略大于侧边栏宽度 */
     padding: 20px;
-}
-
-/* 活动导航链接样式 */
-.sidebar ul li a.active {
-    background-color: #0056b3;
-    color: white;
-    font-weight: bold;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        box-shadow: none;
-    }
-
-    .section {
-        margin-left: 0;
-        padding: 15px;
-    }
-
-    .sidebar ul {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .sidebar ul li {
-        margin: 5px;
-    }
-
-    .sidebar ul li a {
-        padding: 8px 12px;
-        border-radius: 5px;
-    }
 }

@@ -6,27 +6,94 @@
     <title>冰岛旅行日记 | JY's blog</title>
     <link rel="stylesheet" href="iceland.css">
     <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 冰岛页面特定样式 */
+        .iceland-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .iceland-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: var(--box-shadow);
+            border-left: 5px solid #3498db;
+            transition: var(--transition);
+        }
+
+        .iceland-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .attraction-item {
+            background-color: rgba(52, 152, 219, 0.1);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .video-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .video-item {
+            flex: 1 1 300px;
+            max-width: 100%;
+        }
+
+        .video-item video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: var(--box-shadow);
+        }
+
+        @media (max-width: 768px) {
+            .iceland-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+
+            .video-gallery {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-<div id="冰岛" class="section">
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <div id="冰岛" class="section">
     <div class="container">
         <!-- 导航侧边栏 -->
 <aside class="sidebar">
     <h2>导航菜单</h2>
     <ul>
-        <li><a href="#" onclick="showSection('dream')">梦区</a></li>
-        <li><a href="#" onclick="showSection('intro')">简介</a></li>
-        <li><a href="#" onclick="showSection('reykjavik')">雷克雅未克</a></li>
-        <li><a href="#" onclick="showSection('golden-circle')">黄金圈线</a></li>
-        <li><a href="#" onclick="showSection('south')">南部地区</a></li>
-        <li><a href="#" onclick="showSection('east')">东部地区</a></li>
-        <li><a href="#" onclick="showSection('west')">西部半岛</a></li>
-        <li><a href="#" onclick="showSection('northern-lights')">极光专栏</a></li>
-        <li><a href="#" onclick="showSection('food')">美食专栏</a></li>
-        <li><a href="#" onclick="showSection('travel-guide')">自驾与旅行攻略</a></li>
+        <li><a href="#" onclick="showSection('dream')"><i class="fas fa-cloud-moon"></i> 梦区</a></li>
+        <li><a href="#" onclick="showSection('intro')"><i class="fas fa-info-circle"></i> 简介</a></li>
+        <li><a href="#" onclick="showSection('reykjavik')"><i class="fas fa-city"></i> 雷克雅未克</a></li>
+        <li><a href="#" onclick="showSection('golden-circle')"><i class="fas fa-mountain"></i> 黄金圈线</a></li>
+        <li><a href="#" onclick="showSection('south')"><i class="fas fa-umbrella-beach"></i> 南部地区</a></li>
+        <li><a href="#" onclick="showSection('east')"><i class="fas fa-water"></i> 东部地区</a></li>
+        <li><a href="#" onclick="showSection('west')"><i class="fas fa-volcano"></i> 西部半岛</a></li>
+        <li><a href="#" onclick="showSection('northern-lights')"><i class="fas fa-star"></i> 极光专栏</a></li>
+        <li><a href="#" onclick="showSection('food')"><i class="fas fa-utensils"></i> 美食专栏</a></li>
+        <li><a href="#" onclick="showSection('travel-guide')"><i class="fas fa-car"></i> 自驾与旅行攻略</a></li>
     </ul>
     <footer>
-        <a href="../index.html">返回首页</a>
+        <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
     </footer>
 </aside>
 
@@ -93,23 +160,13 @@
     </section>
 
     <section id="reykjavik" class="section-content">
-        <h2>雷克雅未克</h2>
-        <p>雷克雅未克是冰岛的首都，也是世界上位置最北的首都。这座城市虽小，但有着丰富的文化、历史、音乐和街景。</p>
-        <p>漫步雷克雅未克街道，无论是舒适的咖啡厅、五颜六色的房子、充满艺术趣味的涂鸦，还是偶遇结识的朋友，你会沉浸在这样一座充满北欧小镇风情的趣味的都市！</p>
-        <div class="tips">
-            <strong>小贴士：</strong>雷克雅未克主街 Laugavegur 是雷市最古老的街道之一，街道两旁有随处可见彩色的铁皮房屋、艺术涂鸦。
-        </div>
+        <h3>雷克雅未克</h3>
+        <p>雷克雅未克是冰岛的首都……</p>
     </section>
 
     <section id="golden-circle" class="section-content">
-        <h2>黄金圈线</h2>
-        <p>黄金圈是冰岛最受欢迎的旅游路线，包括三个主要景点：</p>
-        <ul>
-            <li><strong>辛格维利尔国家公园</strong> - 北美板块和欧亚板块的交界处</li>
-            <li><strong>盖歇尔间歇泉</strong> - 每5-8分钟喷发一次的壮观地热喷泉</li>
-            <li><strong>黄金瀑布</strong> - 冰岛最壮观的瀑布之一</li>
-        </ul>
-        <p>这三个景点距离雷克雅未克都不远，非常适合一日游。</p>
+        <h3>黄金圈线</h3>
+        <p>黄金圈包括辛格维利尔国家公园、盖歇尔间歇泉和黄金瀑布……</p>
     </section>
 
     <!-- 其他 section 依此类推 -->
@@ -156,7 +213,7 @@
         });
 
         // 2. 显示目标区块
-        document.getElementById(id).classList.remove('hidden');
+        document.getElementById(id).classList.remove('hidden');        
         document.getElementById(id).classList.add('active');
 
         // 3. 更新导航菜单的高亮状态
@@ -180,6 +237,48 @@
     //     }
     //     document.getElementById(sectionId).classList.remove('hidden');
     // }
+
+    // 主题切换功能
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon(currentTheme);
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+
+    function updateThemeIcon(theme) {
+        if (theme === 'dark') {
+            themeIcon.className = 'fas fa-sun';
+            themeToggle.setAttribute('aria-label', '切换到浅色模式');
+        } else {
+            themeIcon.className = 'fas fa-moon';
+            themeToggle.setAttribute('aria-label', '切换到深色模式');
+        }
+    }
+
+    // 添加动画效果
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.section-content');
+        sections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                section.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, 100 * index);
+        });
+    });
 </script>
 </body>
 </html>

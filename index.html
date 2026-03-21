@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <title>JY's blog</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <i class="fas fa-moon"></i>
+    </button>
+
     <header>
         <h1>JY's blog</h1>
         <p>欢迎来到JY小朋友们的旅行日记（懒散更新版）</p>
@@ -16,20 +22,28 @@
         <section class="section card">
             <h2>欢迎语</h2>
             <p>这里是关于两位JY小朋友的旅行博客，内容包括（不）完整的景点、路线等旅游信息的指南。</p>
+            <p>我们通过这个网站记录旅行的美好瞬间，分享实用的旅行攻略，也希望为你的旅行提供一些灵感。</p>
         </section>
     </div>
 
     <div class="container">
         <section class="section card">
             <h2>我们去过的城市</h2>
-            <p>点击下方城市查看我们的旅行日记：</p>
+            <p>点击下方城市查看我们的旅行日记和攻略：</p>
             <div class="city-links">
-                <a href="iceland/iceland.html" class="nav-link">冰岛 🇮🇸</a>
-                <a href="Kunming/kunming.html" class="nav-link">昆明 🌸</a>
-                <a href="map/map.html" class="nav-link">旅行地图 🗺️</a>
+                <a href="iceland/iceland.html" class="nav-link">
+                    <i class="fas fa-icicles"></i> 冰岛 🇮🇸
+                </a>
+                <a href="Kunming/kunming.html" class="nav-link" id="kunmingLink">
+                    <i class="fas fa-umbrella-beach"></i> 昆明 🌸
+                </a>
+                <a href="map/map.html" class="nav-link">
+                    <i class="fas fa-map-marked-alt"></i> 旅行地图 🗺️
+                </a>
             </div>
-            <!-- <a href="#" class="nav-link" onclick="showSection('冰岛')">冰岛</a>
-            <a href="#" class="nav-link" onclick="showSection('昆明')">昆明</a> -->
+            <p style="margin-top: 20px; font-size: 0.9em; color: var(--text-light);">
+                <i class="fas fa-info-circle"></i> 点击城市名称查看详细旅行日记
+            </p>
         </section>
     </div>
 
@@ -37,13 +51,81 @@
         <section class="section card">
             <h2>更新日志</h2>
             <ul class="update-log">
-                <li>🚀 2024.12.16 - 趁着JY1号同志的生日来临，JY2号开始筹备生日惊喜。老友旅行记录网站诞生！</li>
-                <li>🌸 2024.05.05 - JY1号和JY2号结束昆明之旅，于闷闷臭臭的高铁上完成昆明游记的创造。</li>
+                <li>🚀 <strong>2024.12.16</strong> - 趁着JY1号同志的生日来临，JY2号开始筹备生日惊喜。老友旅行记录网站诞生！</li>
+                <li>🌸 <strong>2024.05.05</strong> - JY1号和JY2号结束昆明之旅，于闷闷臭臭的高铁上完成昆明游记的创造。</li>
+                <li>🎨 <strong>2025.03.21</strong> - 网站视觉升级，新增深色模式、响应式设计和图片画廊功能。</li>
             </ul>
         </section>
     </div>
+
     <footer>
-        &copy; 2025 JY's blog | 所有资料来源于原创和网络整理，禁止转载或搬运。
+        <p>&copy; 2025 JY's blog | 所有资料来源于原创和网络整理，禁止转载或搬运。</p>
+        <p style="margin-top: 10px; font-size: 0.8em;">
+            <i class="fas fa-heart" style="color: #e74c3c;"></i> 用心记录每一次旅行
+        </p>
     </footer>
+
+    <script>
+        // 主题切换功能
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        // 检查本地存储的主题偏好
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            if (theme === 'dark') {
+                themeIcon.className = 'fas fa-sun';
+                themeToggle.setAttribute('aria-label', '切换到浅色模式');
+            } else {
+                themeIcon.className = 'fas fa-moon';
+                themeToggle.setAttribute('aria-label', '切换到深色模式');
+            }
+        }
+
+        // 昆明页面链接检查
+        const kunmingLink = document.getElementById('kunmingLink');
+        kunmingLink.addEventListener('click', (e) => {
+            // 检查昆明页面是否存在
+            fetch('Kunming/kunming.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('页面不存在');
+                    }
+                })
+                .catch(() => {
+                    e.preventDefault();
+                    if (confirm('昆明页面正在建设中，是否查看昆明旅行攻略的markdown文件？')) {
+                        window.open('doc/昆明.md', '_blank');
+                    }
+                });
+        });
+
+        // 添加简单的动画效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
 </body>
 </html>
