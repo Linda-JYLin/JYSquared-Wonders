@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from tour_agent import (
-    build_tour_graph, AgentState, datetime,
-    tour_guide, attraction_expert, weather_expert,
-    restaurant_expert, hotel_expert, transport_expert, budget_expert
-)
+from datetime import datetime
+from langchain_core.messages import HumanMessage, AIMessage
+from tour_agent import build_tour_graph, AgentState
 
 app = Flask(__name__,
                 template_folder='templates',
@@ -25,24 +23,20 @@ def start_conversation():
     data = request.json
     session_id = data.get('session_id', 'default')
 
+    location = data.get('location', '杭州')
+    days = data.get('days', 3)
+    people = data.get('people', 2)
+
     # 初始化状态
-    initial_state = AgentState(
-        messages=[{
-            "speaker": "System",
-            "content": f"欢迎！我已了解您的旅行计划：{data.get('location', '杭州')}，{data.get('days', 3)}天，{data.get('people', 2)}人。正在为您规划行程...",
-            "timestamp": datetime.now().isoformat()
-        }],
-        user_preferences={
-            "location": data.get('location', '杭州'),
-            "days": data.get('days', 3),
-            "people": data.get('people', 2)
+    initial_state = {
+        "messages": [HumanMessage(content=f"我想去{location}玩{days}天，{people}个人，帮我规划一下行程")],
+        "user_preferences": {
+            "location": location,
+            "days": days,
+            "people": people
         },
-        user_suggestions=[],
-        current_speaker="TourGuide",
-        max_rounds=data.get('max_rounds', 3),
-        finished=False,
-        round=0
-    )
+        "user_suggestions": []
+    }
 
     graph = build_tour_graph()
 
@@ -51,33 +45,32 @@ def start_conversation():
         'graph': graph
     }
 
-    # 立即运行一次图，生成初始行程建议
+    # 运行agent生成行程建议
     try:
-        print(f"[DEBUG] Starting graph invocation for session {session_id}")
+        print(f"[DEBUG] Starting agent invocation for session {session_id}")
         result = graph.invoke(initial_state)
-        print(f"[DEBUG] Graph result type: {type(result)}")
-        print(f"[DEBUG] Graph result keys: {result.keys() if isinstance(result, dict) else 'N/A'}")
+        print(f"[DEBUG] Agent result type: {type(result)}")
 
-        # LangGraph 直接返回 state，不是 {"state": ...}
-        new_state = result if 'messages' in result else result.get('state', result)
-        conversation_states[session_id]['state'] = new_state
+        # 更新状态
+        conversation_states[session_id]['state'] = result
 
-        # 收集所有AI消息
+        # 收集AI消息
         ai_messages = []
-        for msg in new_state['messages']:
-            if msg['speaker'] not in ['System', 'User']:
+        for msg in result['messages']:
+            if isinstance(msg, AIMessage):
                 ai_messages.append({
-                    'content': msg['content'],
-                    'speaker': msg['speaker']
+                    'content': msg.content,
+                    'speaker': '导游'
                 })
 
         return jsonify({
             'success': True,
-            'system_message': initial_state['messages'][0]['content'],
-            'ai_messages': ai_messages,
-            'finished': new_state.get('finished', False)
+            'system_message': f"欢迎！正在为您规划{location}的{days}天行程...",
+            'ai_messages': ai_messages
         })
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': f'生成行程时出错: {str(e)}'}), 500
 
 @app.route('/api/send_message', methods=['POST'])
@@ -96,39 +89,33 @@ def send_message():
 
     # 添加用户消息到状态
     if user_message:
-        user_msg = {
-            "speaker": "User",
+        state['messages'].append(HumanMessage(content=user_message))
+        state['user_suggestions'].append({
             "content": user_message,
             "timestamp": datetime.now().isoformat()
-        }
-        state['messages'].append(user_msg)
-        state['user_suggestions'].append(user_msg)
+        })
 
-    # 运行一个对话轮次
+    # 运行agent
     try:
-        print(f"[DEBUG] send_message: Starting graph invocation")
+        print(f"[DEBUG] send_message: Starting agent invocation")
         result = graph.invoke(state)
-        print(f"[DEBUG] send_message: Graph completed")
-
-        # LangGraph 直接返回 state
-        new_state = result if 'messages' in result else result.get('state', result)
+        print(f"[DEBUG] send_message: Agent completed")
 
         # 更新状态
-        conversation_data['state'] = new_state
+        conversation_data['state'] = result
 
-        # 收集新生成的AI消息
+        # 收集AI消息
         ai_messages = []
-        for msg in new_state['messages']:
-            if msg['speaker'] not in ['System', 'User']:
+        for msg in result['messages']:
+            if isinstance(msg, AIMessage):
                 ai_messages.append({
-                    'content': msg['content'],
-                    'speaker': msg['speaker']
+                    'content': msg.content,
+                    'speaker': '导游'
                 })
 
         return jsonify({
             'success': True,
-            'ai_messages': ai_messages,
-            'finished': new_state.get('finished', False)
+            'ai_messages': ai_messages
         })
 
     except Exception as e:
@@ -146,8 +133,16 @@ def get_conversation_history():
 
     state = conversation_states[session_id]['state']
 
+    # 转换消息格式
+    messages = []
+    for msg in state['messages']:
+        if isinstance(msg, HumanMessage):
+            messages.append({'speaker': 'User', 'content': msg.content})
+        elif isinstance(msg, AIMessage):
+            messages.append({'speaker': '导游', 'content': msg.content})
+
     return jsonify({
-        'messages': state['messages'],
+        'messages': messages,
         'user_suggestions': state['user_suggestions'],
         'user_preferences': state['user_preferences']
     })
