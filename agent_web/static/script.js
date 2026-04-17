@@ -2,7 +2,11 @@ class TourAgentChat {
     constructor() {
         this.sessionId = 'session_' + Date.now();
         this.isConversationStarted = false;
-        this.currentSpeaker = null;
+        this.isStreaming = false;
+
+        this.streamingAiMessage = null;
+        this.streamingAiContent = null;
+        this.streamingAiRawText = '';
 
         this.initializeElements();
         this.bindEvents();
@@ -32,165 +36,49 @@ class TourAgentChat {
         this.elements.resetConversationBtn.addEventListener('click', () => this.resetConversation());
         this.elements.themeToggle.addEventListener('click', () => this.toggleTheme());
 
-        // 快速操作按钮
         document.querySelectorAll('.quick-action').forEach(button => {
             button.addEventListener('click', (e) => this.handleQuickAction(e.target.dataset.action));
         });
     }
 
-    async startConversation() {
-        // 获取用户输入的旅行信息
-        const location = prompt('请输入目的地:');
-        if (!location || location.trim() === '') {
-            this.showError('请输入有效的目的地');
-            return;
-        }
+    setStreaming(streaming) {
+        this.isStreaming = streaming;
+        this.showLoading(streaming);
 
-        const daysInput = prompt('请输入旅行天数:');
-        const days = parseInt(daysInput);
-        if (!daysInput || isNaN(days) || days <= 0) {
-            this.showError('请输入有效的天数（大于0的数字）');
-            return;
-        }
-
-        const peopleInput = prompt('请输入旅行人数:');
-        const people = parseInt(peopleInput);
-        if (!peopleInput || isNaN(people) || people <= 0) {
-            this.showError('请输入有效的人数（大于0的数字）');
-            return;
-        }
-
-        this.showLoading(true);
-
-        try {
-            const response = await fetch('/api/start_conversation', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    session_id: this.sessionId,
-                    location: location.trim(),
-                    days: days,
-                    people: people,
-                    max_rounds: 3
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                this.isConversationStarted = true;
-                this.enableChat();
-                // 显示系统消息
-                if (data.system_message) {
-                    this.addMessage(data.system_message, 'system', 'System');
-                }
-                // 显示所有AI消息
-                if (data.ai_messages && data.ai_messages.length > 0) {
-                    for (const msg of data.ai_messages) {
-                        this.addMessage(msg.content, 'ai', msg.speaker);
-                    }
-                }
-                if (data.finished) {
-                    this.showCompletionMessage();
-                }
-            } else {
-                this.showError(data.error || '启动对话失败');
-            }
-        } catch (error) {
-            this.showError('连接服务器失败');
-        } finally {
-            this.showLoading(false);
-        }
+        const canInput = this.isConversationStarted && !streaming;
+        this.elements.userInput.disabled = !canInput;
+        this.elements.sendButton.disabled = !canInput;
     }
 
-    async sendMessage() {
-        const message = this.elements.userInput.value.trim();
-        if (!message || !this.isConversationStarted) return;
-
-        // 添加用户消息
-        this.addMessage(message, 'user', 'User');
-        this.elements.userInput.value = '';
-
-        this.showLoading(true);
-
-        try {
-            const response = await fetch('/api/send_message', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    session_id: this.sessionId,
-                    message: message
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                // 显示所有AI消息
-                if (data.ai_messages && data.ai_messages.length > 0) {
-                    for (const msg of data.ai_messages) {
-                        this.addMessage(msg.content, 'ai', msg.speaker);
-                    }
-                }
-                if (data.finished) {
-                    this.showCompletionMessage();
-                }
-            } else {
-                this.showError(data.error || '发送消息失败');
-            }
-        } catch (error) {
-            this.showError('连接服务器失败');
-        } finally {
-            this.showLoading(false);
-        }
+    escapeHtml(text) {
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    addMessage(content, type, speaker) {
+    renderTextContent(contentEl, text) {
+        contentEl.innerHTML = this.escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    createMessageElement(type, speaker, options = {}) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${type}`;
+        messageDiv.className = `message ${type}${options.extraClass ? ` ${options.extraClass}` : ''}`;
 
-        let icon = '';
+        let icon = '<i class="fas fa-comments"></i>';
         let displayName = speaker;
 
-        switch (speaker) {
-            case 'System':
-                icon = '<i class="fas fa-robot"></i>';
-                break;
-            case 'User':
-                icon = '<i class="fas fa-user"></i>';
-                break;
-            case 'TourGuide':
-                icon = '<i class="fas fa-map-marked-alt"></i>';
-                displayName = '导游';
-                break;
-            case 'AttractionExpert':
-                icon = '<i class="fas fa-mountain"></i>';
-                displayName = '景点专家';
-                break;
-            case 'WeatherExpert':
-                icon = '<i class="fas fa-cloud-sun"></i>';
-                displayName = '天气专家';
-                break;
-            case 'RestaurantExpert':
-                icon = '<i class="fas fa-utensils"></i>';
-                displayName = '美食专家';
-                break;
-            case 'HotelExpert':
-                icon = '<i class="fas fa-hotel"></i>';
-                displayName = '住宿专家';
-                break;
-            case 'TransportExpert':
-                icon = '<i class="fas fa-car"></i>';
-                displayName = '交通专家';
-                break;
-            case 'BudgetExpert':
-                icon = '<i class="fas fa-calculator"></i>';
-                displayName = '预算专家';
-                break;
+        if (speaker === 'System') {
+            icon = '<i class="fas fa-microchip"></i>';
+            displayName = '系统';
+        } else if (speaker === 'User') {
+            icon = '<i class="fas fa-user"></i>';
+            displayName = '你';
+        } else if (speaker === '导游' || speaker === 'TourGuide') {
+            icon = '<i class="fas fa-map-marked-alt"></i>';
+            displayName = '导游';
         }
 
         messageDiv.innerHTML = `
@@ -198,16 +86,313 @@ class TourAgentChat {
                 ${icon}
                 <span>${displayName}</span>
             </div>
-            <div class="message-content">
-                ${content.replace(/\n/g, '<br>')}
-            </div>
+            <div class="message-content"></div>
         `;
+
+        const contentEl = messageDiv.querySelector('.message-content');
+        if (options.html) {
+            contentEl.innerHTML = options.initial || '';
+        } else {
+            this.renderTextContent(contentEl, options.initial || '');
+        }
 
         this.elements.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
+        return { messageDiv, contentEl };
+    }
 
-        // 更新当前发言者
-        this.currentSpeaker = speaker;
+    addMessage(content, type, speaker) {
+        if (type === 'ai') {
+            const html = this.formatAiContent(content);
+            this.createMessageElement(type, speaker, { html: true, initial: html });
+            return;
+        }
+        this.createMessageElement(type, speaker, { initial: content });
+    }
+
+    addToolStatus(content) {
+        const safeText = this.escapeHtml(content);
+        const stepperHtml = `
+            <div class="stepper-item">
+                <span class="stepper-dot"></span>
+                <span>${safeText}</span>
+            </div>
+        `;
+        this.createMessageElement('system', 'System', { html: true, initial: stepperHtml, extraClass: 'tool-status-message' });
+    }
+
+    startAiStreamMessage(speaker = '导游') {
+        this.finishAiStreamMessage();
+        const { messageDiv, contentEl } = this.createMessageElement('ai', speaker, { initial: '' });
+        this.streamingAiMessage = messageDiv;
+        this.streamingAiContent = contentEl;
+        this.streamingAiRawText = '';
+    }
+
+    appendAiChunk(chunk, speaker = '导游') {
+        if (!this.streamingAiContent) {
+            this.startAiStreamMessage(speaker);
+        }
+        this.streamingAiRawText += chunk;
+        this.renderTextContent(this.streamingAiContent, this.streamingAiRawText);
+        this.scrollToBottom();
+    }
+
+    finishAiStreamMessage(beautify = false) {
+        if (beautify && this.streamingAiContent) {
+            this.streamingAiContent.innerHTML = this.formatAiContent(this.streamingAiRawText);
+        }
+        this.streamingAiMessage = null;
+        this.streamingAiContent = null;
+        this.streamingAiRawText = '';
+    }
+
+    parseLineType(line) {
+        const lower = line.toLowerCase();
+        if (/餐|美食|午餐|晚餐|小吃|咖啡|甜品/.test(line)) return 'food';
+        if (/天气|温度|降雨|晴|阴|风|气温/.test(line)) return 'weather';
+        if (/交通|地铁|公交|高铁|打车|步行|航班|车程|换乘|出发|抵达/.test(line)) return 'transport';
+        if (/酒店|入住|休息/.test(line)) return 'stay';
+        if (/景点|公园|博物馆|古镇|寺|塔|湖|山|海滩|街区|展馆/.test(line)) return 'spot';
+        if (/breakfast|lunch|dinner/.test(lower)) return 'food';
+        return 'spot';
+    }
+
+    parseLineEmoji(type) {
+        if (type === 'food') return '🍊';
+        if (type === 'weather') return '🧊';
+        if (type === 'transport') return '🟣';
+        if (type === 'stay') return '🛏️';
+        return '🗺️';
+    }
+
+    enrichTimelineText(line) {
+        const trimmed = line.replace(/^[-*•\d\.\s]+/, '').trim();
+        const timePrefixMatch = trimmed.match(/^((?:\d{1,2}[:：]\d{2})|(?:早上|上午|中午|下午|傍晚|晚上|夜间))/);
+
+        if (!timePrefixMatch) {
+            return `<strong>${this.escapeHtml(trimmed)}</strong>`;
+        }
+
+        const time = this.escapeHtml(timePrefixMatch[1]);
+        const rest = this.escapeHtml(trimmed.slice(timePrefixMatch[1].length).trim() || '行程安排');
+        return `<strong>${time}</strong> ${rest}`;
+    }
+
+    formatAiContent(rawText) {
+        const text = String(rawText || '').trim();
+        if (!text) return '';
+
+        const lines = text.split(/\n+/).map(line => line.trim()).filter(Boolean);
+        if (lines.length === 0) return '';
+
+        const dayRegex = /(第[一二三四五六七八九十0-9]+天|Day\s*\d+)/i;
+        let hasDay = false;
+        for (const line of lines) {
+            if (dayRegex.test(line)) {
+                hasDay = true;
+                break;
+            }
+        }
+
+        if (!hasDay) {
+            return `<p class="ai-paragraph">${this.escapeHtml(text).replace(/\n/g, '<br>')}</p>`;
+        }
+
+        const sections = [];
+        let current = { title: '行程建议', items: [] };
+
+        for (const line of lines) {
+            if (dayRegex.test(line)) {
+                if (current.items.length > 0 || current.title !== '行程建议') {
+                    sections.push(current);
+                }
+                current = { title: line, items: [] };
+            } else {
+                current.items.push(line);
+            }
+        }
+        sections.push(current);
+
+        const sectionHtml = sections.map((section, index) => {
+            const timelineItems = section.items.map(item => {
+                const type = this.parseLineType(item);
+                const emoji = this.parseLineEmoji(type);
+                const content = this.enrichTimelineText(item);
+                return `
+                    <li class="timeline-item ${type}" style="animation-delay:${Math.min(index * 50 + 40, 280)}ms">
+                        <div class="timeline-track"><span class="timeline-dot"></span></div>
+                        <div class="timeline-content">${emoji} ${content}</div>
+                    </li>
+                `;
+            }).join('');
+
+            return `
+                <section class="ai-day-card">
+                    <div class="day-tag"><i class="fas fa-calendar-day"></i> ${this.escapeHtml(section.title)}</div>
+                    <ul class="timeline">${timelineItems || `<li class="timeline-item"><div class="timeline-track"><span class="timeline-dot"></span></div><div class="timeline-content">🗺️ <strong>待补充细节</strong></div></li>`}</ul>
+                </section>
+            `;
+        }).join('');
+
+        return `<div class="ai-plan">${sectionHtml}</div>`;
+    }
+
+    handleStreamEvent(event) {
+        if (event.type === 'system') {
+            this.addMessage(event.content, 'system', 'System');
+            return;
+        }
+        if (event.type === 'tool_status') {
+            this.finishAiStreamMessage();
+            this.addToolStatus(event.content || '正在调用工具...');
+            return;
+        }
+        if (event.type === 'message') {
+            this.finishAiStreamMessage();
+            this.addMessage(event.content, 'ai', event.speaker || '导游');
+            return;
+        }
+        if (event.type === 'ai_start') {
+            this.startAiStreamMessage(event.speaker || '导游');
+            return;
+        }
+        if (event.type === 'ai_chunk') {
+            this.appendAiChunk(event.chunk || '', event.speaker || '导游');
+            return;
+        }
+        if (event.type === 'ai_end') {
+            this.finishAiStreamMessage(true);
+            return;
+        }
+        if (event.type === 'error') {
+            this.finishAiStreamMessage();
+            this.showError(event.error || '请求失败');
+        }
+    }
+
+    async streamRequest(url, payload) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            let msg = '请求失败';
+            try {
+                const err = await response.json();
+                msg = err.error || msg;
+            } catch (_) {
+                // ignore
+            }
+            throw new Error(msg);
+        }
+
+        if (!response.body) {
+            throw new Error('浏览器不支持流式读取');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            let eventEnd = buffer.indexOf('\n\n');
+            while (eventEnd !== -1) {
+                const eventBlock = buffer.slice(0, eventEnd);
+                buffer = buffer.slice(eventEnd + 2);
+
+                const data = eventBlock
+                    .split('\n')
+                    .filter(line => line.startsWith('data:'))
+                    .map(line => line.slice(5).trim())
+                    .join('\n');
+
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        this.handleStreamEvent(parsed);
+                    } catch (_) {
+                        // ignore malformed chunk
+                    }
+                }
+
+                eventEnd = buffer.indexOf('\n\n');
+            }
+        }
+    }
+
+    async startConversation() {
+        if (this.isStreaming) return;
+
+        const location = prompt('请输入目的地:');
+        if (!location || location.trim() === '') {
+            this.showError('请输入有效的目的地');
+            return;
+        }
+
+        const daysInput = prompt('请输入旅行天数:');
+        const days = parseInt(daysInput, 10);
+        if (!daysInput || Number.isNaN(days) || days <= 0) {
+            this.showError('请输入有效的天数（大于 0 的数字）');
+            return;
+        }
+
+        const peopleInput = prompt('请输入旅行人数:');
+        const people = parseInt(peopleInput, 10);
+        if (!peopleInput || Number.isNaN(people) || people <= 0) {
+            this.showError('请输入有效的人数（大于 0 的数字）');
+            return;
+        }
+
+        this.isConversationStarted = true;
+        this.setStreaming(true);
+
+        try {
+            await this.streamRequest('/api/start_conversation', {
+                session_id: this.sessionId,
+                location: location.trim(),
+                days,
+                people,
+                max_rounds: 3
+            });
+            this.enableChat();
+        } catch (error) {
+            this.isConversationStarted = false;
+            this.showError(error.message || '连接服务器失败');
+        } finally {
+            this.finishAiStreamMessage(true);
+            this.setStreaming(false);
+        }
+    }
+
+    async sendMessage() {
+        if (this.isStreaming) return;
+
+        const message = this.elements.userInput.value.trim();
+        if (!message || !this.isConversationStarted) return;
+
+        this.addMessage(message, 'user', 'User');
+        this.elements.userInput.value = '';
+        this.setStreaming(true);
+
+        try {
+            await this.streamRequest('/api/send_message', {
+                session_id: this.sessionId,
+                message
+            });
+        } catch (error) {
+            this.showError(error.message || '连接服务器失败');
+        } finally {
+            this.finishAiStreamMessage(true);
+            this.setStreaming(false);
+        }
     }
 
     handleQuickAction(action) {
@@ -215,92 +400,91 @@ class TourAgentChat {
             this.showError('请先开始对话');
             return;
         }
+        if (this.isStreaming) return;
 
         let message = '';
         switch (action) {
-            case 'adjust':
-                const feedback = prompt('请告诉我您想如何调整行程（如：增加景点、改变路线等）:');
-                if (feedback && feedback.trim() !== '') {
-                    message = `我想调整行程：${feedback.trim()}`;
-                } else {
-                    return;
-                }
+            case 'adjust': {
+                const feedback = prompt('请告诉我你想如何调整行程（如：增加景点、改变路线等）');
+                if (!feedback || feedback.trim() === '') return;
+                message = `我想调整行程：${feedback.trim()}`;
                 break;
+            }
             case 'more_food':
                 message = '请推荐更多当地特色美食和餐厅';
                 break;
             case 'budget':
                 message = '请给我一个更详细的预算分析';
                 break;
+            default:
+                return;
         }
 
-        if (message) {
-            this.elements.userInput.value = message;
-            this.sendMessage();
-        }
+        this.elements.userInput.value = message;
+        this.sendMessage();
     }
 
     enableChat() {
-        this.elements.userInput.disabled = false;
-        this.elements.sendButton.disabled = false;
-        this.elements.userInput.focus();
+        if (!this.isStreaming) {
+            this.elements.userInput.disabled = false;
+            this.elements.sendButton.disabled = false;
+            this.elements.userInput.focus();
+        }
+    }
+
+    getWelcomeMarkup() {
+        return `
+            <div class="welcome-message">
+                <div class="message system">
+                    <div class="message-content">
+                        <h3>欢迎使用智能旅游规划助手</h3>
+                        <p>告诉我目的地、天数和人数，我会给你一份高质量可执行行程。</p>
+                        <ul>
+                            <li>📍 目的地</li>
+                            <li>🗓️ 行程天数</li>
+                            <li>👥 出行人数</li>
+                        </ul>
+                        <button id="startConversation" class="btn btn-main btn-start">
+                            <i class="fas fa-play"></i>
+                            <span>开始规划</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     async newConversation() {
-        if (confirm('确定要开始新的对话吗？当前对话将丢失。')) {
-            this.sessionId = 'session_' + Date.now();
-            this.isConversationStarted = false;
-            this.currentSpeaker = null;
+        if (!confirm('确定要开始新的对话吗？当前对话将丢失。')) return;
 
-            // 清空聊天消息，但保留欢迎消息
-            this.elements.chatMessages.innerHTML = `
-                <div class="welcome-message">
-                    <div class="message system">
-                        <div class="message-content">
-                            <h3>欢迎使用智能旅游规划助手！</h3>
-                            <p>我是您的专属导游，将与多位专家一起为您制定完美的旅行计划。</p>
-                            <p>请告诉我您的旅行信息：</p>
-                            <ul>
-                                <li>📍 目的地</li>
-                                <li>📅 旅行天数</li>
-                                <li>👥 旅行人数</li>
-                            </ul>
-                            <button id="startConversation" class="btn-primary">
-                                <i class="fas fa-play"></i> 开始规划
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
+        this.sessionId = 'session_' + Date.now();
+        this.isConversationStarted = false;
+        this.isStreaming = false;
+        this.finishAiStreamMessage();
 
-            this.elements.userInput.value = '';
-            this.elements.userInput.disabled = true;
-            this.elements.sendButton.disabled = true;
+        this.elements.chatMessages.innerHTML = this.getWelcomeMarkup();
 
-            // 重新绑定开始对话按钮事件
-            document.getElementById('startConversation').addEventListener('click', () => this.startConversation());
+        this.elements.userInput.value = '';
+        this.elements.userInput.disabled = true;
+        this.elements.sendButton.disabled = true;
 
-            // 重置后端对话
-            try {
-                await fetch(`/api/reset_conversation?session_id=${this.sessionId}`, {
-                    method: 'POST'
-                });
-            } catch (error) {
-                console.error('重置对话失败:', error);
-            }
+        document.getElementById('startConversation').addEventListener('click', () => this.startConversation());
+
+        try {
+            await fetch(`/api/reset_conversation?session_id=${this.sessionId}`, { method: 'POST' });
+        } catch (_) {
+            // ignore
         }
     }
 
     async resetConversation() {
-        if (confirm('确定要重置当前对话吗？')) {
-            try {
-                await fetch(`/api/reset_conversation?session_id=${this.sessionId}`, {
-                    method: 'POST'
-                });
-                this.newConversation();
-            } catch (error) {
-                this.showError('重置对话失败');
-            }
+        if (!confirm('确定要重置当前对话吗？')) return;
+
+        try {
+            await fetch(`/api/reset_conversation?session_id=${this.sessionId}`, { method: 'POST' });
+            await this.newConversation();
+        } catch (_) {
+            this.showError('重置对话失败');
         }
     }
 
@@ -313,26 +497,11 @@ class TourAgentChat {
         errorDiv.className = 'message system';
         errorDiv.innerHTML = `
             <div class="message-content">
-                <i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i>
-                <strong>错误:</strong> ${message}
+                <i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i>
+                <strong>错误：</strong> ${this.escapeHtml(message)}
             </div>
         `;
         this.elements.chatMessages.appendChild(errorDiv);
-        this.scrollToBottom();
-    }
-
-    showCompletionMessage() {
-        const completionDiv = document.createElement('div');
-        completionDiv.className = 'message system';
-        completionDiv.innerHTML = `
-            <div class="message-content">
-                <i class="fas fa-check-circle" style="color: #27ae60;"></i>
-                <h3>旅行规划完成！</h3>
-                <p>感谢使用智能旅游规划助手，希望您有一个愉快的旅程！</p>
-                <p>您可以点击"新建对话"开始新的旅行规划。</p>
-            </div>
-        `;
-        this.elements.chatMessages.appendChild(completionDiv);
         this.scrollToBottom();
     }
 
@@ -367,7 +536,6 @@ class TourAgentChat {
     }
 }
 
-// 页面加载完成后初始化
 let tourChat;
 document.addEventListener('DOMContentLoaded', () => {
     tourChat = new TourAgentChat();

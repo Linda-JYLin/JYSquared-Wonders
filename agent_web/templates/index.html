@@ -4,122 +4,140 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>智能旅游规划助手 | JY's blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- 主题切换按钮 -->
+    <div class="bg-layer" aria-hidden="true">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+    </div>
+
     <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
         <i class="fas fa-moon"></i>
     </button>
 
-    <div class="container">
-        <!-- 侧边栏 -->
-        <aside class="sidebar">
-            <h2>智能旅游规划</h2>
-            <div class="agent-info">
-                <div class="agent-card">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <h3>导游</h3>
-                    <p>协调整个旅行规划流程</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-mountain"></i>
-                    <h3>景点专家</h3>
-                    <p>推荐最佳旅游景点</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-cloud-sun"></i>
-                    <h3>天气专家</h3>
-                    <p>提供天气信息和建议</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-utensils"></i>
-                    <h3>美食专家</h3>
-                    <p>推荐当地特色美食</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-hotel"></i>
-                    <h3>住宿专家</h3>
-                    <p>推荐合适住宿</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-car"></i>
-                    <h3>交通专家</h3>
-                    <p>规划最佳出行方式</p>
-                </div>
-                <div class="agent-card">
-                    <i class="fas fa-calculator"></i>
-                    <h3>预算专家</h3>
-                    <p>估算旅行预算</p>
-                </div>
+    <div class="app-shell">
+        <aside class="sidebar glass-panel">
+            <div class="brand-block">
+                <p class="brand-chip">AI Travel Studio</p>
+                <h2>智能旅游规划</h2>
+                <p>多专家协同，为你生成高质量行程方案</p>
             </div>
+
+            <nav class="agent-nav" aria-label="专家导航">
+                <button class="agent-item is-active" type="button">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>导游总控</span>
+                </button>
+                <button class="agent-item" type="button">
+                    <i class="fas fa-mountain"></i>
+                    <span>景点专家</span>
+                </button>
+                <button class="agent-item weather" type="button">
+                    <i class="fas fa-cloud-sun"></i>
+                    <span>天气专家</span>
+                </button>
+                <button class="agent-item food" type="button">
+                    <i class="fas fa-utensils"></i>
+                    <span>美食专家</span>
+                </button>
+                <button class="agent-item" type="button">
+                    <i class="fas fa-hotel"></i>
+                    <span>住宿专家</span>
+                </button>
+                <button class="agent-item transport" type="button">
+                    <i class="fas fa-car-side"></i>
+                    <span>交通专家</span>
+                </button>
+                <button class="agent-item" type="button">
+                    <i class="fas fa-calculator"></i>
+                    <span>预算专家</span>
+                </button>
+            </nav>
 
             <div class="conversation-controls">
-                <button id="newConversation" class="btn-primary">
-                    <i class="fas fa-plus"></i> 新建对话
+                <button id="newConversation" class="btn btn-main">
+                    <i class="fas fa-plus"></i>
+                    <span>新建对话</span>
                 </button>
-                <button id="resetConversation" class="btn-secondary">
-                    <i class="fas fa-redo"></i> 重置对话
+                <button id="resetConversation" class="btn btn-sub">
+                    <i class="fas fa-rotate-right"></i>
+                    <span>重置当前</span>
                 </button>
             </div>
 
-            <footer>
-                <a href="../index.html"><i class="fas fa-home"></i> 返回首页</a>
+            <footer class="sidebar-footer">
+                <a href="../index.html"><i class="fas fa-house"></i> 返回首页</a>
             </footer>
         </aside>
 
-        <!-- 主内容区 -->
-        <main class="content">
-            <div class="chat-container">
-                <div class="chat-header">
+        <main class="content-grid">
+            <section class="hero-card glass-panel">
+                <div>
+                    <p class="hero-chip">Bento Travel Console</p>
                     <h1><i class="fas fa-robot"></i> 智能旅游规划助手</h1>
-                    <p>多位专家协同为您制定完美的旅行计划</p>
+                    <p>实时展示 AI 思考路径、工具调用与逐字生成过程，像和专业旅行策划师一起共创。</p>
                 </div>
+                <div class="hero-stats">
+                    <div class="stat-card">
+                        <span>响应模式</span>
+                        <strong>实时流式</strong>
+                    </div>
+                    <div class="stat-card">
+                        <span>布局风格</span>
+                        <strong>Glass + Bento</strong>
+                    </div>
+                </div>
+            </section>
 
+            <section class="chat-panel glass-panel">
                 <div class="chat-messages" id="chatMessages">
-                    <!-- 消息将在这里动态添加 -->
                     <div class="welcome-message">
                         <div class="message system">
                             <div class="message-content">
-                                <h3>欢迎使用智能旅游规划助手！</h3>
-                                <p>我是您的专属导游，将与多位专家一起为您制定完美的旅行计划。</p>
-                                <p>请告诉我您的旅行信息：</p>
+                                <h3>欢迎使用智能旅游规划助手</h3>
+                                <p>告诉我目的地、天数和人数，我会结合天气、景点、美食、交通和预算，给出可落地的旅行建议。</p>
                                 <ul>
                                     <li>📍 目的地</li>
-                                    <li>📅 旅行天数</li>
-                                    <li>👥 旅行人数</li>
+                                    <li>🗓️ 行程天数</li>
+                                    <li>👥 出行人数</li>
                                 </ul>
-                                <button id="startConversation" class="btn-primary">
-                                    <i class="fas fa-play"></i> 开始规划
+                                <button id="startConversation" class="btn btn-main btn-start">
+                                    <i class="fas fa-play"></i>
+                                    <span>开始规划</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="chat-input">
+                <div class="chat-input glass-subpanel">
                     <div class="input-group">
-                        <input type="text" id="userInput" placeholder="输入您的旅行需求或反馈..." disabled>
-                        <button id="sendMessage" disabled>
+                        <input type="text" id="userInput" placeholder="输入你的想法，例如：第三天想轻松一点，少走路..." disabled>
+                        <button id="sendMessage" disabled aria-label="发送消息">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>
                     <div class="quick-actions">
                         <button class="quick-action" data-action="adjust">调整行程</button>
-                        <button class="quick-action" data-action="more_food">更多美食推荐</button>
+                        <button class="quick-action" data-action="more_food">更多美食</button>
                         <button class="quick-action" data-action="budget">详细预算</button>
                     </div>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 
-    <!-- 加载指示器 -->
-    <div id="loadingIndicator" class="loading">
-        <div class="spinner"></div>
-        <p>AI正在思考中...</p>
+    <div id="loadingIndicator" class="loading" aria-live="polite">
+        <div class="brain-loader">
+            <span></span><span></span><span></span>
+        </div>
+        <p>AI 正在思考路线与细节...</p>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
